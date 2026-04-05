@@ -1,1 +1,1 @@
-web: bash -c "cd frontend && npm install && npm run build && cd ../backend && gunicorn app:app --bind 0.0.0.0:$PORT & python bot.py"
+web: gunicorn backend.app:app --bind 0.0.0.0:$PORT & python backend/bot.py
