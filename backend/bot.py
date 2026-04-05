@@ -1,8 +1,10 @@
-import asyncio, requests
+import asyncio, requests, os
 from aiogram import Bot, Dispatcher, types
-from core.config import BOT_TOKEN
+from dotenv import load_dotenv
 
-bot = Bot(token=BOT_TOKEN)
+load_dotenv()
+
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
 @dp.message()
@@ -15,16 +17,15 @@ async def handle(msg: types.Message):
     if "ai" not in text.lower():
         return
 
-    await msg.reply("⚡ Đang xử lý...")
+    loading = await msg.reply("⚡ Đang xử lý...")
 
-    res = requests.post("http://localhost:8000/ai", json={
-        "user_id": msg.from_user.id,
-        "text": text
-    })
+    res = requests.post("http://localhost:8000/api/ai", json={"text": text})
 
-    job_id = res.json()["job_id"]
-
-    await msg.reply(f"✅ Job: {job_id}")
+    await bot.edit_message_text(
+        chat_id=msg.chat.id,
+        message_id=loading.message_id,
+        text=res.json()["reply"]
+    )
 
 async def main():
     await dp.start_polling(bot)
